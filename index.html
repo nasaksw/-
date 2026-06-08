@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>광주 지역 분실물 찾기</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📍 광주 지역 분실물 찾기</h1>
+        
+        <div class="tab-menu">
+            <button class="tab-btn active" onclick="openTab('lost-tab')">🙋‍♂️ 분실물 찾기 (내가 잃어버림)</button>
+            <button class="tab-btn" onclick="openTab('found-tab')">🙋‍♀️ 분실물 등록 (내가 주움)</button>
+            <button class="tab-btn" onclick="openTab('board-tab')">📋 게시판 보기</button>
+        </div>
+
+        <div id="lost-tab" class="tab-content active">
+            <h2>잃어버린 물건 찾기 글 쓰기</h2>
+            <form id="lostForm">
+                <div class="form-group">
+                    <label>지역 선택 (구/동)</label>
+                    <div class="select-row">
+                        <select id="lostGu" onchange="updateDongSelect('lostGu', 'lostDong')">
+                            <option value="">구 선택</option>
+                        </select>
+                        <select id="lostDong">
+                            <option value="">동 선택</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="lostInfo">사진 경로 또는 상세 정보</label>
+                    <input type="text" id="lostInfo" placeholder="예: 상무역 근처에서 검은색 지갑을 분실했습니다." required>
+                </div>
+                <div class="form-group">
+                    <label for="lostReward">현상금 (100원 단위)</label>
+                    <input type="number" id="lostReward" min="0" step="100" placeholder="0원 이상 입력" required>
+                </div>
+                <button type="button" class="submit-btn" onclick="addLostPost()">등록하기</button>
+            </form>
+        </div>
+
+        <div id="found-tab" class="tab-content">
+            <h2>주운 물건 등록하기</h2>
+            <form id="foundForm">
+                <div class="form-group">
+                    <label>습득 장소 선택 (구/동)</label>
+                    <div class="select-row">
+                        <select id="foundGu" onchange="updateDongSelect('foundGu', 'foundDong')">
+                            <option value="">구 선택</option>
+                        </select>
+                        <select id="foundDong">
+                            <option value="">동 선택</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="foundType">분실물 종류</label>
+                    <input type="text" id="foundType" placeholder="예: 스마트폰, 에어팟, 가방 등" required>
+                </div>
+                <div class="form-group">
+                    <label for="foundTitle">제목</label>
+                    <input type="text" id="foundTitle" placeholder="글 제목 입력" required>
+                </div>
+                <div class="form-group">
+                    <label for="foundContent">주인을 찾는 글 내용</label>
+                    <textarea id="foundContent" rows="4" placeholder="습득한 물건의 특징을 적어주세요." required></textarea>
+                </div>
+                <button type="button" class="submit-btn" onclick="addFoundPost()">등록하기</button>
+            </form>
+        </div>
+
+        <div id="board-tab" class="tab-content">
+            <h2>통합 게시판</h2>
+            <div class="board-filter">
+                <button onclick="filterBoard('all')" class="filter-btn active" id="btn-all">전체보기</button>
+                <button onclick="filterBoard('lost')" class="filter-btn" id="btn-lost">잃어버린 사람</button>
+                <button onclick="filterBoard('found')" class="filter-btn" id="btn-found">주운 사람</button>
+            </div>
+
+            <div id="boardList">
+                <p class="empty-msg">등록된 게시글이 없습니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
