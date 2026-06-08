@@ -56,16 +56,43 @@ function updateDongSelect(guId, dongId) {
 
 // 탭 전환 기능 (C언어 메뉴 루프 대응)
 function openTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-    document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
+```
+document
+    .querySelectorAll('.tab-content')
+    .forEach(tab =>
+        tab.classList.remove('active')
+    );
 
-    if(tabId === 'board-tab') {
-        renderBoard();
-    }
+document
+    .querySelectorAll('.tab-btn')
+    .forEach(btn =>
+        btn.classList.remove('active')
+    );
+
+document
+    .getElementById(tabId)
+    .classList.add('active');
+
+if (tabId === 'lost-tab') {
+    document.querySelectorAll('.tab-btn')[0]
+        .classList.add('active');
 }
+
+if (tabId === 'found-tab') {
+    document.querySelectorAll('.tab-btn')[1]
+        .classList.add('active');
+}
+
+if (tabId === 'board-tab') {
+    document.querySelectorAll('.tab-btn')[2]
+        .classList.add('active');
+    renderBoard();
+}
+```
+
+}
+
 
 // 1. 분실물 찾기 글 등록 (C언어 writeLostPost 대응)
 async function addLostPost() {
@@ -97,7 +124,8 @@ async function addLostPost() {
     alert("분실물 찾기 글이 성공적으로 등록되었습니다!");
     document.getElementById('lostForm').reset();
     updateDongSelect('lostGu', 'lostDong');
-    openTab('board-tab');
+    await renderBoard();
+openTab('board-tab');
 }
 
 // 2. 분실물 등록 글 등록 (C언어 writeFoundPost 대응)
@@ -127,7 +155,8 @@ async function addFoundPost() {
     alert("분실물 습득 글이 게시판에 올라갔습니다!");
     document.getElementById('foundForm').reset();
     updateDongSelect('foundGu', 'foundDong');
-    openTab('board-tab');
+    await renderBoard();
+openTab('board-tab');
 }
 
 // 필터링 버튼 동작
@@ -140,19 +169,108 @@ function filterBoard(type) {
 
 // 3. 통합 게시판 렌더링 (C언어 showLostPosts, showFoundPosts 대응)
 async function renderBoard() {
-    const lostSnapshot =
-    await getDocs(
-        collection(db, "lostPosts")
-    );
 
-const foundSnapshot =
-    await getDocs(
-        collection(db, "foundPosts")
-    );
-    const boardList = document.getElementById('boardList');
-    boardList.innerHTML = '';
+```
+const lostSnapshot = await getDocs(
+    collection(db, "lostPosts")
+);
 
-    let html = '';
+const foundSnapshot = await getDocs(
+    collection(db, "foundPosts")
+);
+
+const boardList = document.getElementById('boardList');
+boardList.innerHTML = '';
+
+let html = '';
+
+// 잃어버린 사람 글
+if (currentFilter === 'all' || currentFilter === 'lost') {
+
+    lostSnapshot.forEach((doc) => {
+
+        const post = doc.data();
+
+        html += `
+            <div class="card lost">
+                <span class="card-badge">
+                    잃어버렸어요
+                </span>
+
+                <h3>
+                    장소: 광주광역시
+                    ${post.gu}
+                    ${post.dong}
+                </h3>
+
+                <p>
+                    <strong>설명:</strong>
+                    ${post.info}
+                </p>
+
+                <p style="color:#e74c3c;font-weight:bold;">
+                    💰 현상금:
+                    ${Number(post.reward).toLocaleString()}원
+                </p>
+
+                <small>
+                    등록일:
+                    ${post.date}
+                </small>
+            </div>
+        `;
+    });
+}
+
+// 주운 사람 글
+if (currentFilter === 'all' || currentFilter === 'found') {
+
+    foundSnapshot.forEach((doc) => {
+
+        const post = doc.data();
+
+        html += `
+            <div class="card found">
+                <span class="card-badge">
+                    주웠어요
+                </span>
+
+                <h3>
+                    [${post.type}]
+                    ${post.title}
+                </h3>
+
+                <p>
+                    <strong>습득 장소:</strong>
+                    광주광역시
+                    ${post.gu}
+                    ${post.dong}
+                </p>
+
+                <p>
+                    <strong>상세 내용:</strong>
+                    ${post.content}
+                </p>
+
+                <small>
+                    등록일:
+                    ${post.date}
+                </small>
+            </div>
+        `;
+    });
+}
+
+if (html === '') {
+    boardList.innerHTML =
+        '<p class="empty-msg">등록된 게시글이 없습니다.</p>';
+} else {
+    boardList.innerHTML = html;
+}
+```
+
+}
+
 
     // 잃어버린 사람 글 생성
     if (currentFilter === 'all' || currentFilter === 'lost') {
