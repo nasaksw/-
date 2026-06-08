@@ -68,7 +68,7 @@ function openTab(tabId) {
 }
 
 // 1. 분실물 찾기 글 등록 (C언어 writeLostPost 대응)
-function addLostPost() {
+async function addLostPost() {
     const gu = document.getElementById('lostGu').value;
     const dong = document.getElementById('lostDong').value;
     const info = document.getElementById('lostInfo').value;
@@ -84,7 +84,16 @@ function addLostPost() {
         return;
     }
 
-    lostPosts.push({ gu, dong, info, reward, date: new Date().toLocaleString() });
+    await addDoc(
+    collection(db, "lostPosts"),
+    {
+        gu,
+        dong,
+        info,
+        reward,
+        date: new Date().toLocaleString()
+    }
+);
     alert("분실물 찾기 글이 성공적으로 등록되었습니다!");
     document.getElementById('lostForm').reset();
     updateDongSelect('lostGu', 'lostDong');
@@ -92,7 +101,7 @@ function addLostPost() {
 }
 
 // 2. 분실물 등록 글 등록 (C언어 writeFoundPost 대응)
-function addFoundPost() {
+async function addFoundPost() {
     const gu = document.getElementById('foundGu').value;
     const dong = document.getElementById('foundDong').value;
     const type = document.getElementById('foundType').value;
@@ -104,7 +113,17 @@ function addFoundPost() {
         return;
     }
 
-    foundPosts.push({ gu, dong, type, title, content, date: new Date().toLocaleString() });
+    await addDoc(
+    collection(db, "foundPosts"),
+    {
+        gu,
+        dong,
+        type,
+        title,
+        content,
+        date: new Date().toLocaleString()
+    }
+);
     alert("분실물 습득 글이 게시판에 올라갔습니다!");
     document.getElementById('foundForm').reset();
     updateDongSelect('foundGu', 'foundDong');
@@ -120,7 +139,16 @@ function filterBoard(type) {
 }
 
 // 3. 통합 게시판 렌더링 (C언어 showLostPosts, showFoundPosts 대응)
-function renderBoard() {
+async function renderBoard() {
+    const lostSnapshot =
+    await getDocs(
+        collection(db, "lostPosts")
+    );
+
+const foundSnapshot =
+    await getDocs(
+        collection(db, "foundPosts")
+    );
     const boardList = document.getElementById('boardList');
     boardList.innerHTML = '';
 
@@ -128,37 +156,49 @@ function renderBoard() {
 
     // 잃어버린 사람 글 생성
     if (currentFilter === 'all' || currentFilter === 'lost') {
-        lostPosts.forEach((post, idx) => {
-            html += `
-                <div class="card lost">
-                    <span class="card-badge">잃어버렸어요 (No.${idx + 1})</span>
-                    <h3>장소: 광주광역시 ${post.gu} ${post.dong}</h3>
-                    <p><strong>설명/정보:</strong> ${post.info}</p>
-                    <p style="color: #e74c3c; font-weight: bold;">💰 현상금: ${post.reward.toLocaleString()}원</p>
-                    <small style="color: #999;">등록일: ${post.date}</small>
-                </div>
-            `;
-        });
-    }
+        lostSnapshot.forEach((doc, idx) => {
 
+    const post = doc.data();
+
+    html += `
+        <div class="card lost">
+            <span class="card-badge">
+                잃어버렸어요
+            </span>
+
+            <h3>
+                장소:
+                광주광역시
+                ${post.gu}
+                ${post.dong}
+            </h3>
+
+            <p>
+                <strong>설명:</strong>
+                ${post.info}
+            </p>
+
+            <p style="color:#e74c3c;font-weight:bold;">
+                💰 현상금:
+                ${post.reward.toLocaleString()}원
+            </p>
+
+            <small>
+                등록일:
+                ${post.date}
+            </small>
+        </div>
+    `;
+});
     // 주운 사람 글 생성
     if (currentFilter === 'all' || currentFilter === 'found') {
-        foundPosts.forEach((post, idx) => {
-            html += `
-                <div class="card found">
-                    <span class="card-badge">주웠어요 (No.${idx + 1})</span>
-                    <h3>[${post.type}] ${post.title}</h3>
-                    <p><strong>습득 장소:</strong> 광주광역시 ${post.gu} ${post.dong}</p>
-                    <p><strong>상세 내용:</strong> ${post.content}</p>
-                    <small style="color: #999;">등록일: ${post.date}</small>
-                </div>
-            `;
-        });
-    }
+        foundSnapshot.forEach((doc) => {
 
-    if (html === '') {
-        boardList.innerHTML = '<p class="empty-msg">등록된 게시글이 없습니다.</p>';
-    } else {
-        boardList.innerHTML = html;
+    const post = doc.data();
+
+    html += `
+        ...
+    `;
+});
     }
 }
