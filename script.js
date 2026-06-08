@@ -17,8 +17,7 @@ const dongs = {
 };
 
 // 게시글 저장소 (C언어의 구조체 배열 역할)
-let lostPosts = [];
-let foundPosts = [];
+
 let currentFilter = 'all';
 
 // 초기 로드 시 구 드롭다운 생성
