@@ -1,4 +1,11 @@
 // 광주 지역 데이터 정의 (C언어 배열 매핑)
+import {
+    db,
+    collection,
+    addDoc,
+    getDocs
+} from "./firebase.js";
+
 const gus = ["동구", "서구", "남구", "북구", "광산구"];
 
 const dongs = {
